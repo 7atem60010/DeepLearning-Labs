@@ -3,7 +3,6 @@ from Optimization import Optimizers
 from Layers.Base import Base
 
 
-
 class FullyConnected(Base):
     def __init__(self, input_size, output_size):
         super().__init__()
@@ -46,7 +45,8 @@ class FullyConnected(Base):
             self.gradiant_tensor = np.matmul( self.input_tensor.T  , error_tensor)
             self.weights= self._optimizer.calculate_update( self.weights , self.gradiant_tensor )
 
-
         return error_tensor_prev_layer
 
+
+#FC = FullyConnected(4, 3)
 
