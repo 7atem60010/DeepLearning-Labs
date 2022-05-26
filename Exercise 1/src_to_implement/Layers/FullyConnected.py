@@ -3,7 +3,6 @@ from Optimization import Optimizers
 from Layers.Base import Base
 
 
-
 class FullyConnected(Base):
     def __init__(self, input_size, output_size):
         super().__init__()
@@ -34,4 +33,3 @@ class FullyConnected(Base):
 
 
 FC = FullyConnected(4, 3)
-

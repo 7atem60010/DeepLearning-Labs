@@ -114,6 +114,7 @@ class TestReLU(unittest.TestCase):
     def test_backward(self):
         expected_tensor = np.zeros([self.batch_size, self.input_size])
         expected_tensor[self.half_batch_size:self.batch_size, :] = 2
+        print(expected_tensor)
 
         layer = ReLU.ReLU()
         layer.forward(self.input_tensor)
