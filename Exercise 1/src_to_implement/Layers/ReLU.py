@@ -12,4 +12,4 @@ class ReLU(Base):
         print(input_tensor)
         return input_tensor
 
-    self.bac
+    #self.bac
