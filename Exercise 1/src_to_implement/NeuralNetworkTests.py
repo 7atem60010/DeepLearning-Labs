@@ -47,7 +47,6 @@ class TestFullyConnected1(unittest.TestCase):
             output_tensor = layer.forward(self.input_tensor)
             error_tensor = np.zeros([self.batch_size, self.output_size])
             error_tensor -= output_tensor
-            # print(error_tensor.shape)
             layer.backward(error_tensor)
             new_output_tensor = layer.forward(self.input_tensor)
             self.assertLess(np.sum(np.power(output_tensor, 2)), np.sum(np.power(new_output_tensor, 2)))

@@ -10,6 +10,7 @@ class FullyConnected(Base):
         self.trainable = True
         self.weights = np.random.uniform(size=(input_size+1, output_size))
         
+
         self.input_tensor = None
         self.gradient_weights = None
         self.error = None
@@ -17,6 +18,7 @@ class FullyConnected(Base):
     def forward(self, input_tensor):
         self.input_tensor = input_tensor
         self.input_tensor = np.concatenate((np.ones((self.input_tensor.shape[0],1)),self.input_tensor),axis=1)
+
         self.output_tensor = np.matmul(self.input_tensor, self.weights)
         return self.output_tensor
 
@@ -33,15 +35,16 @@ class FullyConnected(Base):
 
   
     def backward(self, error_tensor):
-        # The input is error tensor , error tensor is 
-
+        # The input is error tensor , error tensor is
         # Get error tensor for prevouis layer
+
         error_tensor_prev_layer = np.matmul(error_tensor , self.weights[:-1,:].T )
 
         # Update weights
+
         if self._optimizer != None:
             #print(self.input_tensor.shape , error_tensor.shape)
-            self.gradiant_tensor = np.matmul( self.input_tensor.T  , error_tensor)
+            self.gradiant_tensor = np.matmul( self.input_tensor.T , error_tensor)
             self.weights= self._optimizer.calculate_update( self.weights , self.gradiant_tensor )
 
         return error_tensor_prev_layer
