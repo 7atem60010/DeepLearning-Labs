@@ -21,7 +21,7 @@ class FullyConnected(Base):
         return self.output_tensor
 
     def initialize(self, weights_initializer, bias_initializer):
-        self.
+        pass
 
 
     @property
