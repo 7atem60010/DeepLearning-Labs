@@ -10,16 +10,19 @@ class FullyConnected(Base):
         self.trainable = True
         self.weights = np.random.uniform(size=(input_size+1, output_size))
         
-        self.input_tensor =  None
+        self.input_tensor = None
         self.gradient_weights = None
         self.error = None
 
     def forward(self, input_tensor):
         self.input_tensor = input_tensor
         self.input_tensor = np.concatenate((np.ones((self.input_tensor.shape[0],1)),self.input_tensor),axis=1)
-        print(self.input_tensor.shape)
-        self.output_tensor = np.matmul(self.input_tensor, self.weights) 
+        self.output_tensor = np.matmul(self.input_tensor, self.weights)
         return self.output_tensor
+
+    def initialize(self, weights_initializer, bias_initializer):
+        self.
+
 
     @property
     def optimizer(self):
@@ -29,7 +32,7 @@ class FullyConnected(Base):
     def optimizer(self, Optimizer):
         self._optimizer = Optimizer
     
-    def gradiant_weights():
+    def gradiant_weights(self):
         return self.gradiant_tensor
 
   
