@@ -6,7 +6,7 @@ class Constant:
         self.value = value
 
     def initialize(self, weights_shape, fan_in, fan_out):
-        return np.ones((weights_shape, fan_in, fan_out)) * self.value
+        return np.ones((fan_in, fan_out)) * self.value
 
 
 class UniformRandom:
@@ -14,7 +14,7 @@ class UniformRandom:
         pass
 
     def initialize(self, weights_shape, fan_in, fan_out):
-        return np.random.uniform(0, 1, (weights_shape, fan_in, fan_out))
+        return np.random.uniform(0, 1, (fan_in, fan_out))
 
 
 class He:
@@ -23,7 +23,7 @@ class He:
 
     def initialize(self, weights_shape, fan_in, fan_out):
         sigma = np.sqrt((2 / fan_in))
-        return np.random.normal(0, sigma, (weights_shape, fan_in, fan_out))
+        return np.random.normal(0, sigma, (fan_in, fan_out))
 
 
 class Xavier:
@@ -32,4 +32,4 @@ class Xavier:
 
     def initialize(self, weights_shape, fan_in, fan_out):
         sigma = np.sqrt((2 / (fan_in + fan_out)))
-        return np.random.normal(0, sigma, (weights_shape, fan_in, fan_out))
+        return np.random.normal(0, sigma, (fan_in, fan_out))
