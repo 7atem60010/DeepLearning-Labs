@@ -9,14 +9,12 @@ class ReLU(Base):
         return
 
     def forward(self, input_tensor):
+        #maybe there is an error here
         input_tensor *= (input_tensor > 0)
-        self.input_tensor = input_tensor
+        self.output_tensor = input_tensor
         return input_tensor
 
-<<<<<<< HEAD
-    #self.bac
-=======
     def backward(self, error_tensor):
-        output = error_tensor * self.input_tensor
+        # you need to mask here, not multiply
+        output = error_tensor * (self.output_tensor > 0)
         return output
->>>>>>> e873758044dd3f2cc76e08d1f794eff5ac74cede
