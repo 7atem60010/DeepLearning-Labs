@@ -1,5 +1,6 @@
 import numpy as np
 from Optimization import Optimizers
+from Layers import Initializers
 from Layers.Base import Base
 from scipy import signal
 
@@ -51,3 +52,8 @@ class Conv(Base):
         if self.output_tensor.shape[-1] == 1:
             self.output_tensor = np.reshape(self.output_tensor, self.output_tensor.shape[:-1])
         return self.output_tensor
+
+    def initialize(self, weights_initializer, bias_initializer):
+        self.bias = bias_initializer.initialize(self.bias.shape, 1, 1)
+        self.weights = weights_initializer.initialize(self.weights.shape, )
+
