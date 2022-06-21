@@ -26,6 +26,7 @@ class Conv(Base):
 
         self.bias = np.ones(num_kernels) * 0.1
         self.weights = np.random.uniform(size=(self.num_kernels,) + convolution_shape)
+        # self.initialize(Initializers.UniformRandom(), Initializers.UniformRandom())
 
         self._optimizer = None
         self._optimizer_weights = None
@@ -122,18 +123,27 @@ class Conv(Base):
             self.prev_error = np.reshape(self.prev_error, self.prev_error.shape[:-1])
 
 
-        self.gradient_bias = np.sum(output_tensor, axis=(0,2,3))
+        self.gradient_bias = np.sum(self.error_tensor, axis=(0,2,3))
         # print(self.gradient_bias)
         d1, d2 = self.convolution_shape[1] - 1, self.convolution_shape[2] - 1
         padding = ((0,0), (0,0), (d1//2, d1 - d1//2), (d2//2, d2 - d2//2))
         self.input_tensor_padded = np.pad(self.input_tensor, padding)
-        print(self.input_tensor_padded.shape, self.output_tensor.shape)
-        for k in range(self.num_kernels):
-            E_k = self.output_tensor[k,:]
-            print(E_k.shape, self.input_tensor_padded.shape)
-            D_weight = signal.correlate(self.input_tensor_padded, E_k, mode='valid')
-            print(D_weight.shape)
-        self.gradient_weights = np.ones_like(self.weights)
+        print(self.num_kernels, self.error_tensor.shape, self.input_tensor_padded.shape)
+        # print(self.input_tensor_padded.shape, self.output_tensor.shape)
+        grad = []
+        for b in range(self.error_tensor.shape[0]):
+            layer_kernel = []
+            for k in range(self.num_kernels):
+                E_k = self.error_tensor[b,k,:]
+                E_k = np.reshape(E_k, (1,) + E_k.shape)
+                layer = self.input_tensor_padded[b, :]
+                D_weight = signal.correlate(layer, E_k, mode='valid')
+                layer_kernel.append(D_weight)
+            grad.append(layer_kernel)
+        self.gradient_weights = np.array(grad)
+        # self.gradient_weights = np.ones_like(self.weights) * -1
+        if self._optimizer:
+            self.weights = self._optimizer_weights.calculate_updates(self.weights, self.gradient_weights)
         # Update weights
         # if self._optimizer != None:
         #     # print(self.input_tensor.shape , error_tensor.shape)
@@ -141,7 +151,6 @@ class Conv(Base):
         #     self.gradiant_tensor = np.matmul(self.input_tensor.T, self.output_tensor)
         #     self.weights = self._optimizer.calculate_update(self.weights, self.gradiant_tensor)
 
-        return self.prev_output
         return self.prev_error
 
 
