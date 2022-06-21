@@ -146,6 +146,8 @@ def test_conv_backward_2d(times=1):
         output_forward = conv_layer.forward(np.copy(base_input_image))
 
         # backward pass through the Conv-layer
+        print("err" ,err_next.shape)
+        print("base_input_image" , base_input_image.shape)
         err_prev = conv_layer.backward(np.copy(err_next))
 
     print("Expected shape E_(n-1): {}".format(expected_err_prev.shape))
@@ -170,16 +172,16 @@ def test_conv_backward_2d(times=1):
 
 if __name__ == "__main__":
     # test if the forward pass works if the bias is set to zero
-    test_conv_forward_2d(np.array([0, 0]))
+    #test_conv_forward_2d(np.array([0, 0]))
 
     # # test if the forward pass works if the bias is not equal to zero
-    test_conv_forward_2d(np.array([0.5, -0.5]))
+    # test_conv_forward_2d(np.array([0.5, -0.5]))
     #
     # # test if the forward pass works when it is called multiple times
-    test_conv_forward_2d(np.array([0.5, -0.5]), 3)
+    # test_conv_forward_2d(np.array([0.5, -0.5]), 3)
     #
     # # test if the backward pass works when it is called multiple times
     test_conv_backward_2d()
     #
     # # test if the backward pass works when it is called multiple times
-    test_conv_backward_2d(3)
+    # test_conv_backward_2d(3)

@@ -74,16 +74,16 @@ class Conv(Base):
         self._optimizer_weights = self._optimizer
 
     ######################### Backward ##########################################
-    def backward(self, output_tensor):
+    def backward(self, error_tensor):
         # The input is error tensor , error tensor is
         # Get error tensor for prevouis layer
         # print(output_tensor.shape)
         # print(self.weights.shape)
 
         if self.one_D:
-            self.output_tensor = output_tensor.reshape(output_tensor.shape + (1,))
+            self.error_tensor = error_tensor.reshape(error_tensor.shape + (1,))
         else:
-            self.output_tensor = output_tensor
+            self.error_tensor = error_tensor
 
         self.num_channels = self.weights.shape[1]
 
@@ -92,7 +92,7 @@ class Conv(Base):
         for b in range(self.batch_size):
             channel_layers = []
             for c in range(self.num_channels):
-                feature_layer = self.output_tensor[b ,:]
+                feature_layer = self.error_tensor[b ,:]
                 feature_layer = feature_layer.repeat(self.stride_shape[0], axis=1).repeat(self.stride_shape[1] , axis=2)
                 feature_layer = feature_layer[:,:self.input_tensor.shape[2] , :self.input_tensor.shape[3]]
                 kernel = self.weights[:,c,:]
@@ -104,6 +104,18 @@ class Conv(Base):
             self.prev_output.append(channel_layers)
 
         self.prev_output = np.array(self.prev_output)
+
+
+
+
+        # Update weights
+        if self._optimizer != None:
+            d1, d2 = self.convolution_shape[1] - 1, self.convolution_shape[2] - 1
+            self.prev_output = np.pad(self.prev_output, ((0,0,) , (0, 0), (d1 // 2, d1 - d1 // 2), (d2 // 2, d2 - d2 // 2)))
+
+            feature_out = signal.convolve(feature_layer, kernel, mode='same')
+
+            pass
 
         if self.prev_output.shape[-1] == 1:
             self.prev_output = np.reshape(self.prev_output, self.prev_output.shape[:-1])
