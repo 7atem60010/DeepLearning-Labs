@@ -110,7 +110,16 @@ class Conv(Base):
 
 
         self.gradient_bias = np.sum(output_tensor, axis=(0,2,3))
-        print(self.gradient_bias)
+        # print(self.gradient_bias)
+        d1, d2 = self.convolution_shape[1] - 1, self.convolution_shape[2] - 1
+        padding = ((0,0), (0,0), (d1//2, d1 - d1//2), (d2//2, d2 - d2//2))
+        self.input_tensor_padded = np.pad(self.input_tensor, padding)
+        print(self.input_tensor_padded.shape, self.output_tensor.shape)
+        for k in range(self.num_kernels):
+            E_k = self.output_tensor[k,:]
+            print(E_k.shape, self.input_tensor_padded.shape)
+            D_weight = signal.correlate(self.input_tensor_padded, E_k, mode='valid')
+            print(D_weight.shape)
         self.gradient_weights = np.ones_like(self.weights)
         # Update weights
         # if self._optimizer != None:
