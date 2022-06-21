@@ -146,8 +146,6 @@ def test_conv_backward_2d(times=1):
         output_forward = conv_layer.forward(np.copy(base_input_image))
 
         # backward pass through the Conv-layer
-        print("err" ,err_next.shape)
-        print("base_input_image" , base_input_image.shape)
         err_prev = conv_layer.backward(np.copy(err_next))
 
     print("Expected shape E_(n-1): {}".format(expected_err_prev.shape))

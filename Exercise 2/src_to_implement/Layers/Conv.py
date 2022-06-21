@@ -92,15 +92,30 @@ class Conv(Base):
         for b in range(self.batch_size):
             channel_layers = []
             for c in range(self.num_channels):
-                feature_layer = self.error_tensor[b ,:]
+                feature_layer = self.error_tensor[b,:]
                 feature_layer = feature_layer.repeat(self.stride_shape[0], axis=1).repeat(self.stride_shape[1] , axis=2)
-                feature_layer = feature_layer[:,:self.input_tensor.shape[2] , :self.input_tensor.shape[3]]
+                feature_layer = feature_layer[:,:self.input_tensor.shape[2], :self.input_tensor.shape[3]]
+
                 kernel = self.weights[:,c,:]
-                feature_out = signal.convolve(feature_layer, kernel , mode='same')
-                s = feature_out.shape[0]
-                feature_out = feature_out[s // 2]
-                feature_out += self.bias[c]
-                channel_layers.append(feature_out)
+
+                print("+++")
+                print(feature_layer.shape)
+                print(kernel.shape)
+                print("==")
+
+                d1, d2 = self.convolution_shape[1] - 1, self.convolution_shape[2] - 1
+                feature_layer = np.pad(feature_layer,(((0, 0), (d1 // 2, d1 - d1 // 2), (d2 // 2, d2 - d2 // 2))))
+
+
+                feature_out = signal.convolve(feature_layer, np.flip(kernel , (1,2)), mode='valid')
+
+                print(feature_out.shape)
+
+
+                # feature_out += self.bias[c]
+
+                channel_layers.append(feature_out[0])
+
             self.prev_error.append(channel_layers)
 
         self.prev_error = np.array(self.prev_error)
