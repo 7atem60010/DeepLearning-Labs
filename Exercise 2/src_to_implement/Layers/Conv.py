@@ -86,7 +86,7 @@ class Conv(Base):
 
         self.num_channels = self.weights.shape[1]
 
-        self.prev_output = []
+        self.prev_error = []
         print(self.output_tensor.shape)
 
         for b in range(self.batch_size):
@@ -101,9 +101,9 @@ class Conv(Base):
                 feature_out = feature_out[s // 2]
                 feature_out += self.bias[c]
                 channel_layers.append(feature_out)
-            self.prev_output.append(channel_layers)
+            self.prev_error.append(channel_layers)
 
-        self.prev_output = np.array(self.prev_output)
+        self.prev_error = np.array(self.prev_error)
 
 
 
@@ -111,16 +111,16 @@ class Conv(Base):
         # Update weights
         if self._optimizer != None:
             d1, d2 = self.convolution_shape[1] - 1, self.convolution_shape[2] - 1
-            self.prev_output = np.pad(self.prev_output, ((0,0,) , (0, 0), (d1 // 2, d1 - d1 // 2), (d2 // 2, d2 - d2 // 2)))
+            self.prev_output = np.pad(self.prev_error, ((0,0,) , (0, 0), (d1 // 2, d1 - d1 // 2), (d2 // 2, d2 - d2 // 2)))
 
             feature_out = signal.convolve(feature_layer, kernel, mode='same')
 
             pass
 
-        if self.prev_output.shape[-1] == 1:
-            self.prev_output = np.reshape(self.prev_output, self.prev_output.shape[:-1])
+        if self.prev_error.shape[-1] == 1:
+            self.prev_error = np.reshape(self.prev_error, self.prev_error.shape[:-1])
 
-        return self.prev_output
+        return self.prev_error
 
 
     def initialize(self, weights_initializer, bias_initializer):
