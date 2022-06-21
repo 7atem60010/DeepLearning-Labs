@@ -184,4 +184,4 @@ if __name__ == "__main__":
     test_conv_backward_2d()
     #
     # # test if the backward pass works when it is called multiple times
-    # test_conv_backward_2d(3)
+    test_conv_backward_2d(3)
