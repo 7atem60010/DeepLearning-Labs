@@ -36,7 +36,7 @@ class Conv(Base):
             self.input_tensor = input_tensor
         self.batch_size = self.input_tensor.shape[0]
         self.output_tensor = []
-        print(self.input_tensor.shape)
+        #print(self.input_tensor.shape)
         for b in range(self.batch_size):
             kernel_layer = []
             for k in range(self.num_kernels):
@@ -49,7 +49,7 @@ class Conv(Base):
                 k_out = k_out[s//2]
                 k_out += self.bias
                 k_out = k_out[::self.stride_shape[0], ::self.stride_shape[1]]
-                print(k_out.shape)
+                #print(k_out.shape)
                 kernel_layer.append(k_out)
                 #kernel_layer += self.bias
             self.output_tensor.append(kernel_layer)
@@ -61,20 +61,34 @@ class Conv(Base):
 
     ##########################  Optimizers #################################
     @property
-    def optimizer_bias(self):
-        return self._optimizer_bias
+    def optimizer(self):
+        return self._optimizer
 
-    @optimizer_bias.setter
-    def optimizer_bias(self, Optimizer):
-        self._optimizer_bias = Optimizer
+    @optimizer.setter
+    def optimizer(self, Optimizer):
+        self._optimizer = Optimizer
+        self._optimizer_bias = self._optimizer
+        self._optimizer_weights = self._optimizer
 
-    @property
-    def optimizer_weights(self):
-        return self._optimizer_weights
+    ######################### Backward ##########################################
+    def backward(self, error_tensor):
+        # The input is error tensor , error tensor is
+        # Get error tensor for prevouis layer
+        print(error_tensor.shape)
+        print(self.weights.shape)
 
-    @optimizer_weights.setter
-    def optimizer_weights(self, Optimizer):
-        self._optimizer_weights = Optimizer
+        for b in range(self.batch_size):
+
+
+        error_tensor_prev_layer = np.matmul(error_tensor, self.weights[:-1, :])
+
+        # Update weights
+        if self._optimizer != None:
+            # print(self.input_tensor.shape , error_tensor.shape)
+            self.gradiant_tensor = np.matmul(self.input_tensor.T, error_tensor)
+            self.weights = self._optimizer.calculate_update(self.weights, self.gradiant_tensor)
+
+        return error_tensor_prev_layer
 
 
 
