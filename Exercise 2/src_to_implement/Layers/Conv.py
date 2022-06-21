@@ -92,27 +92,22 @@ class Conv(Base):
         for b in range(self.batch_size):
             channel_layers = []
             for c in range(self.num_channels):
-                d1, d2  = self.convolution_shape[1] - 1, self.convolution_shape[2] - 1
                 feature_layer = self.output_tensor[b ,:]
-                # print(feature_layer.shape)
                 feature_layer = feature_layer.repeat(self.stride_shape[0], axis=1).repeat(self.stride_shape[1] , axis=2)
-                # print(feature_layer.shape)
-
-                #feature_layer = np.pad(feature_layer, ((0, 0), (d1 // 2, d1 - d1 // 2), (d2 // 2, d2 - d2 // 2)))
+                feature_layer = feature_layer[:,:self.input_tensor.shape[2] , :self.input_tensor.shape[3]]
                 kernel = self.weights[:,c,:]
                 feature_out = signal.convolve(feature_layer, kernel , mode='same')
                 s = feature_out.shape[0]
                 feature_out = feature_out[s // 2]
                 feature_out += self.bias[c]
-                # print(k_out.shape)
                 channel_layers.append(feature_out)
             self.prev_output.append(channel_layers)
 
         self.prev_output = np.array(self.prev_output)
-        # print(self.prev_output.shape)
 
         if self.prev_output.shape[-1] == 1:
-            self.prev_output = np.reshape(self.output_tensor, self.output_tensor.shape[:-1])
+            self.prev_output = np.reshape(self.prev_output, self.prev_output.shape[:-1])
+
 
         self.gradient_bias = np.sum(output_tensor, axis=(0,2,3))
         print(self.gradient_bias)
