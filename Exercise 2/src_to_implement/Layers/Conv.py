@@ -96,7 +96,7 @@ class Conv(Base):
                 feature_layer = self.output_tensor[b ,:]
                 feature_layer = np.pad(feature_layer, ((0, 0), (d1 // 2, d1 - d1 // 2), (d2 // 2, d2 - d2 // 2)))
                 kernel = self.weights[:,c,:]
-                feature_layer = feature_layer.repeat(2, axis=0).repeat(2, axis=1)
+                feature_layer = feature_layer.repeat(self.stride_shape[1], axis=1).repeat(self.stride_shape[0] , axis=2)
                 feature_out = signal.convolve(feature_layer, kernel , mode='valid')
                 s = feature_out.shape[0]
                 feature_out = feature_out[s // 2]
