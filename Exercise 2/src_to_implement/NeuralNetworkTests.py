@@ -492,7 +492,7 @@ class TestConv(unittest.TestCase):
 
     def test_forward(self):
         np.random.seed(1337)
-        conv = Conv.Conv((1, 1), (1, 3, 3), 1)
+        conv = Conv.Conv((1, 1),  (1,3, 3), 1)
         conv.weights = (1./15.) * np.array([[[1, 2, 1], [2, 3, 2], [1, 2, 1]]])
         conv.bias = np.array([0])
         conv.weights = np.expand_dims(conv.weights, 0)
