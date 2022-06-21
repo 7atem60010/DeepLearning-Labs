@@ -24,7 +24,7 @@ class Conv(Base):
         self.convolution_shape = convolution_shape
         self.num_kernels = num_kernels
 
-        self.bias = 1
+        self.bias = np.ones(num_kernels) * 0.1
         self.weights = np.random.uniform(size=(self.num_kernels,) + convolution_shape)
 
         self._optimizer  = None
@@ -50,7 +50,8 @@ class Conv(Base):
                 k_out = signal.correlate(image, kernel, mode='valid')
                 s = k_out.shape[0]
                 k_out = k_out[s//2]
-                k_out += self.bias
+                print(self.bias[k])
+                k_out += self.bias[k]
                 k_out = k_out[::self.stride_shape[0], ::self.stride_shape[1]]
                 #print(k_out.shape)
                 kernel_layer.append(k_out)
@@ -121,6 +122,6 @@ class Conv(Base):
 
 
     def initialize(self, weights_initializer, bias_initializer):
-        self.bias = bias_initializer.initialize(1, 1, 1)
+        self.bias = bias_initializer.initialize(self.bias.shape, 1, 1)
         self.weights = weights_initializer.initialize(self.weights.shape, np.prod(self.convolution_shape), np.prod(self.convolution_shape[1:])*self.num_kernels)
 
