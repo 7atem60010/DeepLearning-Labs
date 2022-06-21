@@ -539,7 +539,6 @@ class TestConv(unittest.TestCase):
         input_tensor = np.array(range(3 * 15 * self.batch_size), dtype=np.float)
         input_tensor = input_tensor.reshape((self.batch_size, 3, 15))
         output_tensor = conv.forward(input_tensor)
-        print(output_tensor.shape)
         self.assertEqual(output_tensor.shape,  (self.batch_size,self.num_kernels, 8))
 
     def test_backward_size(self):
@@ -553,8 +552,12 @@ class TestConv(unittest.TestCase):
     def test_backward_size_stride(self):
         conv = Conv.Conv((3, 2), self.kernel_shape, self.num_kernels)
         input_tensor = np.array(range(np.prod(self.input_shape) * self.batch_size), dtype=np.float)
+        print(input_tensor.shape)
         input_tensor = input_tensor.reshape(self.batch_size, *self.input_shape)
+        print(input_tensor.shape)
         output_tensor = conv.forward(input_tensor)
+        print(output_tensor.shape)
+
         error_tensor = conv.backward(output_tensor)
         self.assertEqual(error_tensor.shape, (self.batch_size, *self.input_shape))
 
@@ -562,7 +565,6 @@ class TestConv(unittest.TestCase):
         conv = Conv.Conv([2], (3, 3), self.num_kernels)
         input_tensor = np.array(range(45 * self.batch_size), dtype=np.float)
         input_tensor = input_tensor.reshape((self.batch_size, 3, 15))
-        print(input_tensor.shape)
         output_tensor = conv.forward(input_tensor)
         print(output_tensor.shape)
         error_tensor = conv.backward(output_tensor)

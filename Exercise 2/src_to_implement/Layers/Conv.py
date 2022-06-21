@@ -26,7 +26,7 @@ class Conv(Base):
 
         self.bias = np.ones(num_kernels) * 0.1
         self.weights = np.random.uniform(size=(self.num_kernels,) + convolution_shape)
-        # self.initialize(Initializers.UniformRandom(), Initializers.UniformRandom())
+        self.initialize(Initializers.Constant(), Initializers.UniformRandom())
 
         self._optimizer = None
         self._optimizer_weights = None
@@ -157,8 +157,8 @@ class Conv(Base):
             grad.append(layer_kernel)
         self.gradient_weights = np.array(grad)
         # self.gradient_weights = np.ones_like(self.weights) * -1
-        if self._optimizer:
-            self.weights = self._optimizer_weights.calculate_updates(self.weights, self.gradient_weights)
+        # if self._optimizer:
+        #     self.weights = self._optimizer_weights.calculate_updates(self.weights, self.gradient_weights)
         # Update weights
         # if self._optimizer != None:
         #     # print(self.input_tensor.shape , error_tensor.shape)
