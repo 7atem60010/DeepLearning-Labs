@@ -46,11 +46,11 @@ class Conv(Base):
                 image = self.input_tensor[b, :]
                 image = np.pad(image, ((0, 0), (d1//2, d1 - d1//2), (d2//2, d2 - d2//2)))
                 kernel = self.weights[k]
-                print(image.shape, self.weights.shape, kernel.shape)
+                #print(image.shape, self.weights.shape, kernel.shape)
                 k_out = signal.correlate(image, kernel, mode='valid')
                 s = k_out.shape[0]
                 k_out = k_out[s//2]
-                print(self.bias[k])
+                #print(self.bias[k])
                 k_out += self.bias[k]
                 k_out = k_out[::self.stride_shape[0], ::self.stride_shape[1]]
                 #print(k_out.shape)
@@ -78,8 +78,8 @@ class Conv(Base):
     def backward(self, output_tensor):
         # The input is error tensor , error tensor is
         # Get error tensor for prevouis layer
-        print(output_tensor.shape)
-        print(self.weights.shape)
+        #print(output_tensor.shape)
+        #print(self.weights.shape)
 
         if self.one_D:
             self.output_tensor = output_tensor.reshape(output_tensor.shape + (1,))
@@ -93,15 +93,18 @@ class Conv(Base):
         for b in range(self.batch_size):
             channel_layers = []
             for c in range(self.num_channels):
-                d1, d2 = self.convolution_shape[1] - 1, self.convolution_shape[2] - 1
+                d1, d2  = self.convolution_shape[1] - 1, self.convolution_shape[2] - 1
                 feature_layer = self.output_tensor[b ,:]
-                feature_layer = np.pad(feature_layer, ((0, 0), (d1 // 2, d1 - d1 // 2), (d2 // 2, d2 - d2 // 2)))
+                print(feature_layer.shape)
+                feature_layer = feature_layer.repeat(self.stride_shape[0], axis=1).repeat(self.stride_shape[1] , axis=2)
+                print(feature_layer.shape)
+
+                #feature_layer = np.pad(feature_layer, ((0, 0), (d1 // 2, d1 - d1 // 2), (d2 // 2, d2 - d2 // 2)))
                 kernel = self.weights[:,c,:]
-                feature_layer = feature_layer.repeat(self.stride_shape[1], axis=1).repeat(self.stride_shape[0] , axis=2)
-                feature_out = signal.convolve(feature_layer, kernel , mode='valid')
+                feature_out = signal.convolve(feature_layer, kernel , mode='same')
                 s = feature_out.shape[0]
                 feature_out = feature_out[s // 2]
-                feature_out += self.bias
+                feature_out += self.bias[c]
                 # print(k_out.shape)
                 channel_layers.append(feature_out)
             self.prev_output.append(channel_layers)
