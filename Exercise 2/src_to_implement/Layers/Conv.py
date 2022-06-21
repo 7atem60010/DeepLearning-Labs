@@ -18,7 +18,6 @@ class Conv(Base):
             print('1D')
             self.stride_shape = (self.stride_shape[0], self.stride_shape[0])
         self.convolution_shape = convolution_shape
-        print(self.convolution_shape)
         self.num_kernels = num_kernels
 
         self.bias = 1
@@ -31,7 +30,6 @@ class Conv(Base):
             self.input_tensor = input_tensor
         self.batch_size = self.input_tensor.shape[0]
         self.output_tensor = []
-        print(self.input_tensor.shape)
         for b in range(self.batch_size):
             kernel_layer = []
             for k in range(self.num_kernels):
@@ -54,6 +52,6 @@ class Conv(Base):
         return self.output_tensor
 
     def initialize(self, weights_initializer, bias_initializer):
-        self.bias = bias_initializer.initialize(self.bias.shape, 1, 1)
-        self.weights = weights_initializer.initialize(self.weights.shape, )
+        self.bias = bias_initializer.initialize(1, 1, 1)
+        self.weights = weights_initializer.initialize(1, np.prod(self.convolution_shape), np.prod(self.convolution_shape[1:])*self.num_kernels)
 
