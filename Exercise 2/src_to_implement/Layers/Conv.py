@@ -37,7 +37,8 @@ class Conv(Base):
                 image = self.input_tensor[b, :]
                 image = np.pad(image, ((0, 0), (d1//2, d1 - d1//2), (d2//2, d2 - d2//2)))
                 kernel = self.weights[k]
-                k_out = signal.correlate(image, kernel , mode='valid')
+                print(image.shape, self.weights.shape, kernel.shape)
+                k_out = signal.correlate(image, kernel, mode='valid')
                 s = k_out.shape[0]
                 k_out = k_out[s//2]
                 k_out += self.bias
@@ -53,5 +54,5 @@ class Conv(Base):
 
     def initialize(self, weights_initializer, bias_initializer):
         self.bias = bias_initializer.initialize(1, 1, 1)
-        self.weights = weights_initializer.initialize(1, np.prod(self.convolution_shape), np.prod(self.convolution_shape[1:])*self.num_kernels)
+        self.weights = weights_initializer.initialize(self.weights.shape, np.prod(self.convolution_shape), np.prod(self.convolution_shape[1:])*self.num_kernels)
 
