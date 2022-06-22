@@ -26,14 +26,12 @@ class Conv(Base):
 
         self.bias = np.ones(num_kernels) * 0.1
         self.weights = np.random.uniform(size=(self.num_kernels,) + convolution_shape)
-        self.initialize(Initializers.Constant(), Initializers.UniformRandom())
-        print(self.weights.shape, 'weights')
+        # self.initialize(Initializers.UniformRandom(), Initializers.UniformRandom())
 
         self._optimizer = None
         self._optimizer_weights = None
 
     def forward(self, input_tensor):
-        print('input', input_tensor.shape)
         if self.one_D:
             self.input_tensor = input_tensor.reshape(input_tensor.shape + (1,))
         else:
@@ -78,11 +76,12 @@ class Conv(Base):
 
     ######################### Backward ##########################################
     def backward(self, error_tensor):
-        print('error in', error_tensor.shape)
         # The input is error tensor , error tensor is
         # Get error tensor for prevouis layer
         # print(output_tensor.shape)
         # print(self.weights.shape)
+        gradient_input = np.zeros_like(self.input_tensor)
+
 
         if self.one_D:
             self.error_tensor = error_tensor.reshape(error_tensor.shape + (1,))
@@ -95,34 +94,63 @@ class Conv(Base):
         print(self.output_tensor.shape)
 
         for b in range(self.batch_size):
-            channel_layers = []
-            for c in range(self.num_channels):
-                feature_layer = self.error_tensor[b,:]
-                feature_layer = feature_layer.repeat(self.stride_shape[0], axis=1).repeat(self.stride_shape[1] , axis=2)
-                feature_layer = feature_layer[:,:self.input_tensor.shape[2], :self.input_tensor.shape[3]]
+            for c in range(self.weights.shape[1]):
+                channel_layers = []
+                for k in range(self.weights.shape[0]):
+                    feature_layer = self.error_tensor[b,k,:]
+                    feature_layer = signal.resample(feature_layer,
+                                           feature_layer.shape[0] * self.stride_shape[0], axis=0)
+                    feature_layer = signal.resample(feature_layer, feature_layer.shape[1] * self.stride_shape[1], axis=1)
+                    feature_layer = feature_layer[:self.input_tensor.shape[2], :self.input_tensor.shape[3]]
 
-                kernel = self.weights[:,c,:]
+                    # we need zero-interpolation, so we put zero for interpolated values
+                    if self.stride_shape[1] > 1:
+                        for i, row in enumerate(feature_layer):
+                            for ii, element in enumerate(row):
+                                if ii % self.stride_shape[1] != 0:
+                                    row[ii] = 0
+                    if self.stride_shape[0] > 1:
+                        for i, row in enumerate(feature_layer):
+                            for ii, element in enumerate(row):
+                                if i % self.stride_shape[0] != 0:
+                                    row[ii] = 0
 
                 # print("+++")
                 # print(feature_layer.shape)
                 # print(kernel.shape)
                 # print("==")
+                    kernel = self.weights[k,c,:,:]
 
-                d1, d2 = self.convolution_shape[1] - 1, self.convolution_shape[2] - 1
-                feature_layer = np.pad(feature_layer,(((0, 0), (d1 // 2, d1 - d1 // 2), (d2 // 2, d2 - d2 // 2))))
+                    # print("+++")
+                    # print(feature_layer.shape)
+                    # print(kernel.shape)
+                    # print("==")
 
+                    # d1, d2 = self.convolution_shape[1] - 1, self.convolution_shape[2] - 1
+                    # feature_layer = np.pad(feature_layer,(((0, 0), (d1 // 2, d1 - d1 // 2), (d2 // 2, d2 - d2 // 2))))
 
                 feature_out = signal.convolve(feature_layer, kernel, mode='valid')
 
-                print(feature_out.shape)
+                    feature_out = signal.convolve(feature_layer, kernel, mode='same')
+
+                   # print(feature_out.shape)
 
 
-                # feature_out += self.bias[c]
+                    # feature_out += self.bias[c]
 
-                channel_layers.append(feature_out[0])
+                    channel_layers.append(feature_out)
+                temp2 = np.stack(channel_layers, axis=0)
 
-            self.prev_error.append(channel_layers)
+                # after stacking the output of the convolution of each channel,
+                # we should sum it over channels to get a 2d one-channel image
+                temp2 = temp2.sum(axis=0)
 
+                # element-wise addition of bias for every kernel is NOT NEEDED here.
+                gradient_input[b, c] = temp2
+
+            #     self.prev_error.append(channel_layers)
+            #
+            # self.prev_error = np.array(self.prev_error)
         self.prev_error = np.array(self.prev_error)
         print('error out', self.prev_error.shape)
 
@@ -140,6 +168,16 @@ class Conv(Base):
         #
         if self.prev_error.shape[-1] == 1:
             self.prev_error = np.reshape(self.prev_error, self.prev_error.shape[:-1])
+        # if self._optimizer != None:
+        #     d1, d2 = self.convolution_shape[1] - 1, self.convolution_shape[2] - 1
+        #     self.prev_output = np.pad(self.prev_error, ((0,0,) , (0, 0), (d1 // 2, d1 - d1 // 2), (d2 // 2, d2 - d2 // 2)))
+        #
+        #     feature_out = signal.convolve(feature_layer, kernel, mode='same')
+        #
+        #     pass
+
+        if gradient_input.shape[-1] == 1:
+            gradient_input = np.reshape(gradient_input, gradient_input.shape[:-1])
 
 
         self.gradient_bias = np.sum(self.error_tensor, axis=(0,2,3))
@@ -151,27 +189,19 @@ class Conv(Base):
         # self.input_tensor_padded = self.input_tensor
         # print(self.input_tensor_padded.shape, self.output_tensor.shape)
         grad = []
-        # for b in range(self.error_tensor.shape[0]):
-        for k in range(self.num_kernels):
+        for b in range(self.error_tensor.shape[0]):
             layer_kernel = []
-            for c in range(self.weights.shape[1]):
-                E_k = self.error_tensor[:, k, :, :]
-                # E_k = np.reshape(E_k, (1,) + E_k.shape)
-                layer = self.input_tensor_padded[:, c, :, :]
+            for k in range(self.num_kernels):
+                E_k = self.error_tensor[b,k,:]
+                E_k = np.reshape(E_k, (1,) + E_k.shape)
+                layer = self.input_tensor_padded[b, :]
                 D_weight = signal.correlate(layer, E_k, mode='valid')
-                # D_weight = D_weight.reshape(D_weight.shape[1:])
                 layer_kernel.append(D_weight)
             grad.append(layer_kernel)
-        self.gradient_weights = np.array(grad)[0]
-        print(self.gradient_weights)
-        self._optimizer = Optimizers.Adam(0.9, .95, .99)
-        self.weights = self._optimizer.calculate_update(self.weights, self.gradient_weights)
-        # print(s)
-        # self.gradient_weights = np.reshape(self.gradient_weights, self.gradient_weights.shape[1:])
-        # print(self.gradient_weights.shape, 'gr', self.convolution_shape)
+        self.gradient_weights = np.array(grad)
         # self.gradient_weights = np.ones_like(self.weights) * -1
-        # if self._optimizer:
-        #     self.weights = self._optimizer_weights.calculate_updates(self.weights, self.gradient_weights)
+        if self._optimizer:
+            self.weights = self._optimizer_weights.calculate_updates(self.weights, self.gradient_weights)
         # Update weights
         # if self._optimizer != None:
         #     # print(self.input_tensor.shape , error_tensor.shape)
@@ -179,7 +209,7 @@ class Conv(Base):
         #     self.gradiant_tensor = np.matmul(self.input_tensor.T, self.output_tensor)
         #     self.weights = self._optimizer.calculate_update(self.weights, self.gradiant_tensor)
 
-        return self.prev_error
+        return gradient_input
 
 
     def initialize(self, weights_initializer, bias_initializer):

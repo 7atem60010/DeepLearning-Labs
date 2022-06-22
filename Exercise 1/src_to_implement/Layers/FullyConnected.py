@@ -38,7 +38,9 @@ class FullyConnected(Base):
         # The input is error tensor , error tensor is
         # Get error tensor for prevouis layer
 
-        error_tensor_prev_layer = np.matmul(error_tensor , self.weights[:-1,:].T )
+        error_tensor_prev_layer = error_tensor @ self.weights[1:,:].T
+
+       # print(error_tensor.shape ,error_tensor_prev_layer.shape)
 
         # Update weights
 
