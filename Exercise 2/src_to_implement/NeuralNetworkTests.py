@@ -757,7 +757,7 @@ class TestPooling(unittest.TestCase):
         batch_size = 2
         input_tensor = np.array(range(np.prod(input_shape) * batch_size), dtype=np.float)
         input_tensor = input_tensor.reshape(batch_size, *input_shape)
-        print(input_tensor)
+        #print(input_tensor)
         result = pool.forward(input_tensor)
         expected_result = np.array([[[[ 5.,  7.],[13., 15.]]],[[[21., 23.],[29., 31.]]]])
         self.assertEqual(np.sum(np.abs(result - expected_result)), 0)
