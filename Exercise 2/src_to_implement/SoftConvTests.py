@@ -162,10 +162,10 @@ def test_conv_backward_2d(times=1):
     assert np.sum(np.abs(expected_gradient_bias - conv_layer.gradient_bias)) < 1e-7, \
         "Computation of error with respect to the bias is not correct."
 
-    # assert np.sum(np.abs(expected_err_prev - err_prev)) < 1e-7, "Computation of error with respect to the previous layer is not correct."
+    assert np.sum(np.abs(expected_err_prev - err_prev)) < 1e-7, "Computation of error with respect to the previous layer is not correct."
 
     assert np.sum(np.abs(expected_gradient_weights - conv_layer.gradient_weights)) < 1e-7, \
-        "Computation of error with respect to the weight is not correct."
+       "Computation of error with respect to the weight is not correct."
 
 
 if __name__ == "__main__":
@@ -182,4 +182,4 @@ if __name__ == "__main__":
     test_conv_backward_2d()
     #
     # # test if the backward pass works when it is called multiple times
-    # test_conv_backward_2d(3)
+    test_conv_backward_2d(3)

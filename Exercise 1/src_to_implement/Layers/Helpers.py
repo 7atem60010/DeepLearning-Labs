@@ -23,6 +23,7 @@ def gradient_check(layers, input_tensor, label_tensor):
             for layer in reversed(layers[:-1]):
                 error_tensor = layer.backward(error_tensor)
             analytical_derivative = error_tensor[i, j]
+            print("1." , analytical_derivative)
 
             for layer in layers[:-1]:
                 plus_epsilon = layer.forward(plus_epsilon)
@@ -31,6 +32,7 @@ def gradient_check(layers, input_tensor, label_tensor):
             lower_error = layers[-1].forward(minus_epsilon, label_tensor)
 
             numerical_derivative = (upper_error - lower_error) / (2 * epsilon)
+            print("2." ,numerical_derivative)
 
             normalizing_constant = max(np.abs(analytical_derivative), np.abs(numerical_derivative))
 
