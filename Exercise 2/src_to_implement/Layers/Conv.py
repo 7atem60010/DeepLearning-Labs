@@ -146,9 +146,6 @@ class Conv(Base):
 
                 gradient_input[b, c] = stacked_channels
 
-        if gradient_input.shape[-1] == 1:
-            gradient_input = np.reshape(gradient_input, gradient_input.shape[:-1])
-
         ##################################  Weights calculations ##################################
 
         # we only have 2D images for this part in our tests here.
@@ -187,8 +184,7 @@ class Conv(Base):
                     # STRIDE implementation (up-sampling)
                     temp = signal.resample(error_tensor[batch, out_ch],
                                            error_tensor[batch, out_ch].shape[0] * self.stride_shape[0], axis=0)
-                    temp = signal.resample(temp, error_tensor[batch, out_ch].shape[1] * self.stride_shape[1],
-                                           axis=1)
+                    temp = signal.resample(temp, error_tensor[batch, out_ch].shape[1] * self.stride_shape[1], axis=1)
                     # slice it to match the correct shape if the last step of up-sampling was not full
                     temp = temp[:self.input_tensor.shape[2], :self.input_tensor.shape[3]]
                     # we need zero-interpolation, so we put zero for interpolated values
@@ -205,8 +201,8 @@ class Conv(Base):
 
                     # loop over input channels
                     for in_ch in range(self.input_tensor.shape[1]):
-                        temp_gradient_weights[batch, out_ch, in_ch] = signal.correlate(padded_input[batch, in_ch],
-                                                                                       temp, mode='valid')
+                        temp_gradient_weights[batch, out_ch, in_ch] = signal.correlate(padded_input[batch, in_ch], temp,
+                                                                                       mode='valid')
             # we have to sum over the batches.
             self.gradient_weights = temp_gradient_weights.sum(axis=0)
 
@@ -218,6 +214,9 @@ class Conv(Base):
             self.weights = self._optimizer.calculate_update(self.weights, self.gradient_weights)
         if self._bias_optimizer:
             self.bias = self._bias_optimizer.calculate_update(self.bias, self.gradient_bias)
+
+        if gradient_input.shape[-1] == 1:
+            gradient_input = np.reshape(gradient_input, gradient_input.shape[:-1])
 
         return gradient_input
 

@@ -599,9 +599,9 @@ class TestConv(unittest.TestCase):
 
     def test_gradient_weights(self):
         np.random.seed(1337)
-        input_tensor = np.abs(np.random.random((2, 6, 5, 7)))
+        input_tensor = np.abs(np.random.random((2, 3, 5, 7)))
         layers = list()
-        layers.append(Conv.Conv((1, 1), (6, 4, 4), self.hidden_channels))
+        layers.append(Conv.Conv((1, 1), (3, 3, 3), self.hidden_channels))
         layers.append(Flatten.Flatten())
         layers.append(L2Loss())
         difference = Helpers.gradient_check_weights(layers, input_tensor, self.label_tensor, False)
