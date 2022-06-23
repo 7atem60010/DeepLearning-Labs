@@ -134,11 +134,7 @@ class Conv(Base):
 
                     kernel = self.weights[k,c,:,:]
 
-
                     feature_out = signal.convolve(feature_layer, kernel, mode='same')
-
-
-
                     channel_layers.append(feature_out)
 
                 stacked_channels = np.stack(channel_layers, axis=0)
@@ -153,35 +149,35 @@ class Conv(Base):
             temp_gradient_weights = np.zeros((error_tensor.shape[0], *self.weights.shape))
 
             padded_input = np.pad(self.input_tensor, ((0, 0), (0, 0), (d1//2, d1-d1//2), (d2//2, d2-d2//2)))
-            print(padded_input.shape, '=======')
+            #print(padded_input.shape, '=======')
 
-            # [CORRELATION operation] for the weight gradient there's no flipping, so we again use the correlation.
-            # loop over batches
-            for batch in range(error_tensor.shape[0]):
+            for b in range(error_tensor.shape[0]):
                 # loop over different kernels (output channels)
-                for out_ch in range(error_tensor.shape[1]):
+                for c in range(error_tensor.shape[1]):
 
-                    # STRIDE implementation (up-sampling)
-                    temp = signal.resample(error_tensor[batch, out_ch],
-                                           error_tensor[batch, out_ch].shape[0] * self.stride_shape[0], axis=0)
-                    temp = signal.resample(temp, error_tensor[batch, out_ch].shape[1] * self.stride_shape[1], axis=1)
-                    # slice it to match the correct shape if the last step of up-sampling was not full
-                    temp = temp[:self.input_tensor.shape[2], :self.input_tensor.shape[3]]
-                    # we need zero-interpolation, so we put zero for interpolated values
+                    # UpSampling
+                    out_layer = self.error_tensor[b, c, :]
+                    out_layer = signal.resample(out_layer,
+                                                    out_layer.shape[0] * self.stride_shape[0], axis=0)
+                    out_layer = signal.resample(out_layer, out_layer.shape[1] * self.stride_shape[1],
+                                                    axis=1)
+                    out_layer = out_layer[:self.input_tensor.shape[2], :self.input_tensor.shape[3]]
+
+                    # Zero-interpolation
                     if self.stride_shape[1] > 1:
-                        for i, row in enumerate(temp):
+                        for i, row in enumerate(out_layer):
                             for ii, element in enumerate(row):
                                 if ii % self.stride_shape[1] != 0:
                                     row[ii] = 0
                     if self.stride_shape[0] > 1:
-                        for i, row in enumerate(temp):
+                        for i, row in enumerate(out_layer):
                             for ii, element in enumerate(row):
                                 if i % self.stride_shape[0] != 0:
                                     row[ii] = 0
 
                     # loop over input channels
-                    for in_ch in range(self.input_tensor.shape[1]):
-                        temp_gradient_weights[batch, out_ch, in_ch] = signal.correlate(padded_input[batch, in_ch], temp,
+                    for k in range(self.input_tensor.shape[1]):
+                        temp_gradient_weights[b, c, k] = signal.correlate(padded_input[b, k], out_layer,
                                                                                        mode='valid')
             # we have to sum over the batches.
             self.gradient_weights = temp_gradient_weights.sum(axis=0)
