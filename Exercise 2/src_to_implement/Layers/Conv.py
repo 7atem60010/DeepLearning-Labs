@@ -147,33 +147,13 @@ class Conv(Base):
                 gradient_input[b, c] = stacked_channels
 
         ##################################  Weights calculations ##################################
+        d1, d2 = self.convolution_shape[1] - 1, self.convolution_shape[2] - 1
 
-        # we only have 2D images for this part in our tests here.
-        if len(self.convolution_shape) == 3 and self.error_tensor.shape[-1] != 1:
-            # gradient of sth has always the same shape as it.
-            # here "temp_gradient_weights" has one more dimension for the batches.
-            temp_gradient_weights = np.zeros((error_tensor.shape[0], self.weights.shape[0], self.weights.shape[1],
-                                              self.weights.shape[2], self.weights.shape[3]))
+        if len(self.convolution_shape) == 3 and self.error_tensor.shape[-1] != 1: # case of 3D
+            temp_gradient_weights = np.zeros((error_tensor.shape[0], *self.weights.shape))
 
-            # [PADDING] of input's width and height
-            conv_plane_out = []
-            for batch in range(self.input_tensor.shape[0]):
-                ch_conv_out = []
-                # loop over different kernels (output channels)
-                for out_ch in range(self.input_tensor.shape[1]):
-                    ch_conv_out.append(np.pad(self.input_tensor[batch, out_ch],
-                                              ((self.convolution_shape[1] // 2, self.convolution_shape[1] // 2),
-                                               (self.convolution_shape[2] // 2,
-                                                self.convolution_shape[2] // 2)), mode='constant'))
-                    if self.convolution_shape[2] % 2 == 0:
-                        ch_conv_out[out_ch] = ch_conv_out[out_ch][:, :-1]
-                    if self.convolution_shape[1] % 2 == 0:
-                        ch_conv_out[out_ch] = ch_conv_out[out_ch][:-1, :]
-
-                conv_plane = np.stack(ch_conv_out, axis=0)
-                conv_plane.tolist()
-                conv_plane_out.append(conv_plane)
-            padded_input = np.stack(conv_plane_out, axis=0)
+            padded_input = np.pad(self.input_tensor, ((0, 0), (0, 0), (d1//2, d1-d1//2), (d2//2, d2-d2//2)))
+            print(padded_input.shape, '=======')
 
             # [CORRELATION operation] for the weight gradient there's no flipping, so we again use the correlation.
             # loop over batches
