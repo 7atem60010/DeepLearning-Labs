@@ -780,6 +780,7 @@ class TestNeuralNetwork2(unittest.TestCase):
         net.append_layer(fcl_2)
 
         self.assertEqual(len(net.layers), 2)
+        print( net.layers[0].optimizer  == net.layers[1].optimizer )
         self.assertFalse(net.layers[0].optimizer is net.layers[1].optimizer)
         self.assertTrue(np.all(net.layers[0].weights == 0.123))
 

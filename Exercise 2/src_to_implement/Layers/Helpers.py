@@ -110,7 +110,6 @@ def gradient_check_weights(layers, input_tensor, label_tensor, bias):
         else:
             difference[it.multi_index] = np.abs(analytical_derivative - numerical_derivative) / normalizing_constant
 
-
         it.iternext()
     return difference
 

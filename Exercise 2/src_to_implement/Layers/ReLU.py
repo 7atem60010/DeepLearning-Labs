@@ -5,8 +5,7 @@ import numpy as np
 class ReLU(Base):
     def __init__(self):
         super().__init__()
-        self.input_tensor = None
-        return
+        pass
 
     def forward(self, input_tensor):
         #maybe there is an error here

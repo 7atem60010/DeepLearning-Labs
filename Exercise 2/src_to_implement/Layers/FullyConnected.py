@@ -13,10 +13,7 @@ class FullyConnected(Base):
         self.trainable = True
         self.bias = np.ones((1, self.fan_out))
         self.weights = np.random.uniform(size=(self.fan_in, self.fan_out))
-        # print(self.bias.shape)
-        # print(self.weights.shape)
         self.weights = np.concatenate((self.bias, self.weights))
-        # print(self.weights.shape)
 
         self.input_tensor = None
         self.gradient_weights = None
@@ -25,14 +22,12 @@ class FullyConnected(Base):
     def forward(self, input_tensor):
         N = input_tensor.shape[0]
         self.input_tensor = np.concatenate((np.ones((N, 1)), input_tensor), axis=1)
-        # print(self.bias.shape, self.input_tensor.shape)
-        # self.input_tensor = np.concatenate((np.ones((self.input_tensor.shape[0], 1)), self.input_tensor), axis=1)
-        # self.input_tensor = np.concatenate((np.ones((self.input_tensor.shape[0], 1)), self.input_tensor), axis=1)
+
         self.output_tensor = np.matmul(self.input_tensor, self.weights)
         return self.output_tensor
 
     def initialize(self, weights_initializer, bias_initializer):
-        self.weights = weights_initializer.initialize((2, 1), self.fan_in, self.fan_out)
+        self.weights = weights_initializer.initialize((self.fan_in, self.fan_out), self.fan_in, self.fan_out)
         self.bias = bias_initializer.initialize(1, self.fan_in, self.fan_out)
 
     @property
@@ -53,10 +48,9 @@ class FullyConnected(Base):
         error_tensor_prev_layer = np.matmul(error_tensor, self.weights[1:, :].T)
 
         # Update weights
+        self.gradient_weights = np.matmul(self.input_tensor.T, error_tensor)
         if self._optimizer != None:
-            # print(self.input_tensor.shape , error_tensor.shape)
-            self.gradiant_tensor = np.matmul(self.input_tensor.T, error_tensor)
-            self.weights = self._optimizer.calculate_update(self.weights, self.gradiant_tensor)
+            self.weights = self._optimizer.calculate_update(self.weights, self.gradient_weights)
 
         return error_tensor_prev_layer
 
