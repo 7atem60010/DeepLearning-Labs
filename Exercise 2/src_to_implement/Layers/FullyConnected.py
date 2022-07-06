@@ -21,14 +21,25 @@ class FullyConnected(Base):
 
     def forward(self, input_tensor):
         N = input_tensor.shape[0]
+        #self.weights = np.concatenate((self.bias, self.weights))
         self.input_tensor = np.concatenate((np.ones((N, 1)), input_tensor), axis=1)
+        # print(self.input_tensor.shape)
+        # print(self.weights.shape)
+        # print(self.bias.shape)
+        #self.weights = np.concatenate((self.bias, self.weights))
+        #print(self.weights.shape)
+
 
         self.output_tensor = np.matmul(self.input_tensor, self.weights)
+
+        #print(self.output_tensor)
         return self.output_tensor
 
     def initialize(self, weights_initializer, bias_initializer):
-        self.weights = weights_initializer.initialize((self.fan_in, self.fan_out), self.fan_in, self.fan_out)
-        self.bias = bias_initializer.initialize(1, self.fan_in, self.fan_out)
+        self.weights = weights_initializer.initialize((2, 1), self.fan_in, self.fan_out)
+        self.bias = bias_initializer.initialize((1,self.fan_out), 1, self.fan_out)
+        self.weights = np.vstack((self.weights, self.bias))
+
 
     @property
     def optimizer(self):
@@ -45,9 +56,11 @@ class FullyConnected(Base):
         # The input is error tensor , error tensor is 
 
         # Get error tensor for prevouis layer
-        error_tensor_prev_layer = np.matmul(error_tensor, self.weights[1:, :].T)
+        error_tensor_prev_layer = np.matmul(error_tensor, self.weights[1:,:].T)
 
         # Update weights
+        # print(self.weights.shape)
+        # print(error_tensor.shape)
         self.gradient_weights = np.matmul(self.input_tensor.T, error_tensor)
         if self._optimizer != None:
             self.weights = self._optimizer.calculate_update(self.weights, self.gradient_weights)

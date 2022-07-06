@@ -24,13 +24,33 @@ class NeuralNetwork(Base):
             self.layers.append(layer)
 
     def forward(self):
-        self.input_tensor = self.data_layer.next()
-        self.label_tensor = self.data_layer.next()
+        self.input_tensor ,  self.label_tensor = self.data_layer.next()
 
-        print(self.layers)
-        print(self.input_tensor[0])
+        out_layer = self.layers[0].forward(self.input_tensor)
 
-        out_layer = self.layers[0].forward(self.input_tensor[0])
         for layer in self.layers[1:]:
             out_layer = layer.forward(out_layer)
 
+        out_layer = self.loss_layer.forward(out_layer , self.label_tensor[0])
+        #print(out_layer)
+        return out_layer
+
+    def backward(self):
+        error_tensor = self.loss_layer.backward(self.label_tensor)
+        for layer in reversed(self.layers):
+            error_tensor = layer.backward(error_tensor)
+
+    def train(self , num_iterations):
+        for i in range(num_iterations):
+            self.loss.append(self.forward())
+            if (i + 1) % 200 == 0:
+                print("training iteration", str(i + 1) + ":", 'loss =', self.loss[i])
+            self.backward()
+
+    def test(self , input_tensor):
+        out_layer = self.layers[0].forward(input_tensor)
+
+        for layer in self.layers[1:]:
+            out_layer = layer.forward(out_layer)
+
+        return out_layer

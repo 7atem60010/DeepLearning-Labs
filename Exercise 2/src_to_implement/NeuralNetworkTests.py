@@ -764,7 +764,7 @@ class TestPooling(unittest.TestCase):
 
 
 class TestNeuralNetwork2(unittest.TestCase):
-    plot = False
+    plot = True
     directory = 'plots/'
     log = 'log.txt'
 
