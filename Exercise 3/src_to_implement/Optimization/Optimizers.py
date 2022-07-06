@@ -1,15 +1,20 @@
 import numpy as np
+import base_optimizer
 
 
-class Sgd:
+class Sgd(base_optimizer):
     def __init__(self, learning_rate: float):
         self.learning_rate = learning_rate
 
     def calculate_update(self, weight_tensor, gradient_tensor):
-        return weight_tensor - self.learning_rate * gradient_tensor
+        if self.regularizer != None:
+            reg =  self.reregularizer.calculate_gradient(weight_tensor)
+            return weight_tensor - self.learning_rate*reg - self.learning_rate * gradient_tensor
+        else:
+            return weight_tensor - self.learning_rate * gradient_tensor
 
 
-class SgdWithMomentum:
+class SgdWithMomentum(base_optimizer):
     def __init__(self, learning_rate: float , momentum_rate):
         self.learning_rate = learning_rate
         self.momentum_rate = momentum_rate
@@ -21,7 +26,7 @@ class SgdWithMomentum:
         return weight_tensor + v
 
 
-class Adam:
+class Adam(base_optimizer):
     def __init__(self, learning_rate: float , mu , roh):
         self.learning_rate = learning_rate
         self.mu = mu

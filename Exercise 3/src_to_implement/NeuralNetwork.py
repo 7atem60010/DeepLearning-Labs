@@ -32,7 +32,6 @@ class NeuralNetwork(Base):
             out_layer = layer.forward(out_layer)
 
         out_layer = self.loss_layer.forward(out_layer , self.label_tensor[0])
-        #print(out_layer)
         return out_layer
 
     def backward(self):
@@ -54,3 +53,11 @@ class NeuralNetwork(Base):
             out_layer = layer.forward(out_layer)
 
         return out_layer
+
+    @property
+    def phase(self):
+        return self.phase
+
+    @phase.setter
+    def phase(self, phase):
+        self.phase = phase
