@@ -1,5 +1,4 @@
 
-
 class base_optimizer:
     def __init__(self, learning_rate: float):
         self.learning_rate = learning_rate

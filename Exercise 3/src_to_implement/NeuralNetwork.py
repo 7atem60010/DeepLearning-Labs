@@ -13,6 +13,7 @@ class NeuralNetwork(Base):
         self.layers =  []
         self.data_layer = []
         self.loss_layer =  []
+        self.reg_loss = [0.0]
 
 
     def append_layer(self , layer):
@@ -29,9 +30,15 @@ class NeuralNetwork(Base):
         out_layer = self.layers[0].forward(self.input_tensor)
 
         for layer in self.layers[1:]:
+            if layer.optimizer != None and layer.optimizer.regularizer != None:
+                self.reg_loss.append( layer.optimizer.regularizer.norm(layer.weights))
             out_layer = layer.forward(out_layer)
 
         out_layer = self.loss_layer.forward(out_layer , self.label_tensor[0])
+
+        # adding regularization
+        out_layer = out_layer + sum(self.reg_loss)
+
         return out_layer
 
     def backward(self):
@@ -42,8 +49,8 @@ class NeuralNetwork(Base):
     def train(self , num_iterations):
         for i in range(num_iterations):
             self.loss.append(self.forward())
-            if (i + 1) % 200 == 0:
-                print("training iteration", str(i + 1) + ":", 'loss =', self.loss[i])
+            # if (i + 1) % 200 == 0:
+            #     print("training iteration", str(i + 1) + ":", 'loss =', self.loss[i])
             self.backward()
 
     def test(self , input_tensor):

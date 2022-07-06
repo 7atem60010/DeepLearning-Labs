@@ -7,7 +7,8 @@ except BaseException as e:
         LSTM_TEST = False
     else:
         raise e
-from Optimization import Constraints
+from Optimization import Constraints , Optimizers
+from Layers import Dropout
 import numpy as np
 from scipy import stats
 from scipy.ndimage.filters import gaussian_filter

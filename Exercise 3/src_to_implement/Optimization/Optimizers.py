@@ -1,20 +1,20 @@
 import numpy as np
-import base_optimizer
+from Optimization  import base_optimizer
 
 
-class Sgd(base_optimizer):
+class Sgd(base_optimizer.base_optimizer):
     def __init__(self, learning_rate: float):
         self.learning_rate = learning_rate
 
     def calculate_update(self, weight_tensor, gradient_tensor):
         if self.regularizer != None:
-            reg =  self.reregularizer.calculate_gradient(weight_tensor)
+            reg =  self.regularizer.calculate_gradient(weight_tensor)
             return weight_tensor - self.learning_rate*reg - self.learning_rate * gradient_tensor
         else:
             return weight_tensor - self.learning_rate * gradient_tensor
 
 
-class SgdWithMomentum(base_optimizer):
+class SgdWithMomentum(base_optimizer.base_optimizer):
     def __init__(self, learning_rate: float , momentum_rate):
         self.learning_rate = learning_rate
         self.momentum_rate = momentum_rate
@@ -23,10 +23,15 @@ class SgdWithMomentum(base_optimizer):
     def calculate_update(self, weight_tensor, gradient_tensor):
         v = self.momentum_rate * self.prev_v - self.learning_rate*gradient_tensor
         self.prev_v = v
-        return weight_tensor + v
+
+        if self.regularizer != None:
+            reg =  self.regularizer.calculate_gradient(weight_tensor)
+            return weight_tensor - self.learning_rate*reg + v
+        else:
+            return weight_tensor + v
 
 
-class Adam(base_optimizer):
+class Adam(base_optimizer.base_optimizer):
     def __init__(self, learning_rate: float , mu , roh):
         self.learning_rate = learning_rate
         self.mu = mu
@@ -45,6 +50,12 @@ class Adam(base_optimizer):
         r_hat = r / (1 - self.roh**self.k)
         self.k +=1
 
-        weight_tensor = weight_tensor - self.learning_rate*(v_hat / np.sqrt(r_hat))
+        if self.regularizer != None:
+            reg =  self.regularizer.calculate_gradient(weight_tensor)
+            weight_tensor = weight_tensor - self.learning_rate*reg - self.learning_rate * (v_hat / np.sqrt(r_hat))
+        else:
+            weight_tensor = weight_tensor - self.learning_rate * (v_hat / np.sqrt(r_hat))
+
+        # weight_tensor = weight_tensor - self.learning_rate*(v_hat / np.sqrt(r_hat))
         return weight_tensor
 
