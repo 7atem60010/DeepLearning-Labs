@@ -7,7 +7,7 @@ class Dropout(Base):
     def __init__(self, probability):
         self.probability = probability
         self.trainable = False
-        self.testing_phase = False
+        self.testing_phase = Base.testing_phase
         self.random_selection = None
 
     def forward(self, input_tensor):

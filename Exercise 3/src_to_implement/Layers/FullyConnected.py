@@ -68,3 +68,4 @@ class FullyConnected(Base):
         return error_tensor_prev_layer
 
 # FC = FullyConnected(4, 3)
+
