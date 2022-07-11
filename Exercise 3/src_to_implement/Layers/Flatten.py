@@ -10,7 +10,10 @@ class Flatten:
     def forward(self, input_tensor):
         self.input_tensor = input_tensor
         self.backward_shape = self.input_tensor.shape
-        return self.input_tensor.reshape((self.input_tensor.shape[0] , self.input_tensor.shape[1]*self.input_tensor.shape[2]*self.input_tensor.shape[3]))
+        if len(self.input_tensor.shape) == 2 :
+            return self.input_tensor.reshape((self.input_tensor.shape[0] , self.input_tensor.shape[1]))
+        if len(self.input_tensor.shape) == 4 :
+            return self.input_tensor.reshape((self.input_tensor.shape[0] , self.input_tensor.shape[1]*self.input_tensor.shape[2]*self.input_tensor.shape[3]))
 
     def backward (self , error_tensor):
         return error_tensor.reshape(self.backward_shape)

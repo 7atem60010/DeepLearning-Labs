@@ -20,6 +20,7 @@ class BatchNormalization(Base):
         self.prev_var = 1
         self.optimizer = None
         self.bias_optimizer = None
+        self.regularizer = None
 
 
     def initialize(self, weights_initializer, bias_initializer):
@@ -75,7 +76,6 @@ class BatchNormalization(Base):
             if self.testing_phase == True:
                 self.input_tensor_hat = (input_tensor_temp - self.mean_hat) / np.sqrt(self.var_hat + np.finfo(float).eps)
             else:
-                # mini-batch mean , var
                 new_mean = np.mean(input_tensor_temp, axis=0)
                 new_variance = np.var(input_tensor_temp, axis=0)
 
@@ -100,8 +100,9 @@ class BatchNormalization(Base):
         if len(self.input_tensor.shape) == 2:
 
             error_tensor_prev_layer =  compute_bn_gradients(error_tensor, self.input_tensor, self.weights, self.mean, self.var)
-            self.weights_grad = np.sum(error_tensor * self.input_tensor_hat, axis= 0 )
-            self.bias_grad = np.sum(error_tensor, axis= 0 )
+
+            self.gradient_weights = np.sum(error_tensor * self.input_tensor_hat, axis= 0 )
+            self.gradient_bias = np.sum(error_tensor, axis= 0 )
 
         if len(self.input_tensor.shape) == 4:
 
@@ -109,12 +110,11 @@ class BatchNormalization(Base):
                                                            self.var)
             error_tensor_prev_layer = self.reformat(error_tensor_prev_layer)
 
-            self.weights_grad = np.sum(error_tensor * self.input_tensor_hat, axis=0)
-            self.bias_grad = np.sum(error_tensor, axis=0)
+            self.gradient_weights = np.sum(self.reformat(error_tensor) * self.input_tensor_hat, axis=0)
+            self.gradient_bias = np.sum(self.reformat(error_tensor), axis=0)
 
-        '''Update with optimizers'''
         if self.optimizer:
-            self.weights = self.optimizer.calculate_update(self.weights, self.gradient_weights)
+            self.weights = self.optimizer.calculate_update(self.weights, self.gradient_weights )
         if self.bias_optimizer:
             self.bias = self.bias_optimizer.calculate_update(self.bias, self.gradient_bias)
 

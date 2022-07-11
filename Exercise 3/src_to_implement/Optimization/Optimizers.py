@@ -5,6 +5,7 @@ from Optimization  import base_optimizer
 class Sgd(base_optimizer.base_optimizer):
     def __init__(self, learning_rate: float):
         self.learning_rate = learning_rate
+        self.regularizer = None
 
     def calculate_update(self, weight_tensor, gradient_tensor):
         if self.regularizer != None:
@@ -19,6 +20,8 @@ class SgdWithMomentum(base_optimizer.base_optimizer):
         self.learning_rate = learning_rate
         self.momentum_rate = momentum_rate
         self.prev_v = 0
+        self.regularizer = None
+
 
     def calculate_update(self, weight_tensor, gradient_tensor):
         v = self.momentum_rate * self.prev_v - self.learning_rate*gradient_tensor
@@ -39,6 +42,8 @@ class Adam(base_optimizer.base_optimizer):
         self.prev_v = 0
         self.prev_r = 0
         self.k = 1
+        self.regularizer = None
+
 
     def calculate_update(self, weight_tensor, gradient_tensor):
         v = self.mu * self.prev_v + (1-self.mu)*gradient_tensor
