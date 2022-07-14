@@ -1,3 +1,4 @@
+import numpy
 import numpy as np
 from Layers import Sigmoid, TanH
 from Layers import Initializers
@@ -35,20 +36,79 @@ class RNN:
         if self.memorize == False:
             self.hidden_state = np.zeros((1, self.hidden_size))
 
-        self.hidden_tensor = []
+        self.hidden_tensor = [self.hidden_state]
+        self.sigmoid_out = []
+        self.tanh_out = []
+        self.o = []
+        self.u = []
+
 
         for t, X in enumerate(self.input_tensor):
             X = np.reshape(X, (1, X.shape[0]))
             self.hidden_tensor.append(self.hidden_state)
-            HX = np.concatenate((self.hidden_state, X), axis=1)
-            HX_out = self.FC_mid.forward(HX)
-            self.hidden_state = self.sigmoid.forward(HX_out)
+            hx = np.concatenate((self.hidden_state, X), axis=1)
+            u = self.FC_mid.forward(hx)
+            self.u.append(u)
+            self.hidden_state = self.tanh.forward(u)
+            self.tanh_out.append(self.hidden_state)
 
-            HY_out = self.FC_out.forward(self.hidden_state)
-            y = self.sigmoid.forward(HY_out)
+            o = self.FC_out.forward(self.hidden_state)
+            self.o.append(o)
+            y = self.sigmoid.forward(o)
             self.output_tensor[t] = y
 
+
+
         return self.output_tensor
+
+    def backward(self, error_tensor):
+        T = error_tensor.shape[0]
+        self.grad_input = np.zeros((T, self.input_size))
+        self.grad_hidden = np.zeros((T+1, self.hidden_size))
+        self.grad_weights_out = 0
+        self.grad_weights_mid = 0
+
+        self.output_grad = []
+        for t in reversed(range(len(error_tensor))):
+            # output sigmoid
+            self.sigmoid.fx = self.output_tensor[t]
+            d_sigmoid = self.sigmoid.backward(error_tensor[t]).reshape((1,-1))
+            d_o = d_sigmoid * error_tensor[t]
+            h = self.hidden_tensor[t]
+            d_wieghts_out = d_o * h.T
+            d_bias_out = d_o
+
+
+            #back to hidden
+            self.FC_out.input_tensor = self.hidden_tensor[t]
+            grad_out_in = self.FC_out.backward(d_sigmoid)
+
+            self.grad_weights_out += self.FC_out.gradient_weights
+
+            self.tanh.fx = h
+            d_tanh = self.tanh.backward(self.u[t])
+            w_hh = self.FC_mid.weights[:self.hidden_size]
+            w_hy = self.FC_out.weights[1:]
+            d_h = np.matmul(d_o, w_hy.T)
+
+            d_w_hh = numpy.matmul(d_h.T, self.hidden_tensor[t-1])
+            xt = self.input_tensor[t].reshape((1,-1))
+            d_w_xh = np.matmul(d_h.T, xt)
+            d_b_h = d_h * d_tanh
+
+            self.output_grad.append(d_w_xh)
+            # self.
+
+        self.output_grad = np.array(self.output_grad)
+        return self.output_grad
+
+
+    @property
+    def optimizer(self):
+        return self._optimizer
+    @optimizer.setter
+    def optimizer(self, value):
+        self._optimizer = value
 
     @property
     def weights(self):
