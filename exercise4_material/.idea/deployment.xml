@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="qi74cumy@cip4e1.cip.cs.fau.de:22" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="ad23ovab@cip4e3.cip.cs.fau.de:22 (3)" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
-      <paths name="qi74cumy@cip4e1.cip.cs.fau.de:22">
+      <paths name="ad23ovab@cip4e3.cip.cs.fau.de:22 (3)">
         <serverdata>
           <mappings>
-            <mapping deploy="/tmp/pycharm_project_476" local="$PROJECT_DIR$" />
+            <mapping deploy="/tmp/pycharm_project_4" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="ad23ovab@cip4e3.cip.cs.fau.de:22 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/pycharm_project_688" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>

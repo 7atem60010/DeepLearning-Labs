@@ -58,6 +58,8 @@ class Trainer:
         # -update weights
         # -return the loss
         #TODO
+
+        self._optim.zero_grad()
         
         
     
