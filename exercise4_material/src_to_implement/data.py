@@ -15,16 +15,17 @@ class ChallengeDataset(Dataset):
     # TODO implement the Dataset class according to the description
     def __init__(self , data , mode):
         self.data  = data
-        #print(self.data.iloc[0:10])
-        pass
+        self.mode  =  mode
+        self._transform = tv.transforms.Compose([ tv.transforms.ToPILImage(), tv.transforms.ToTensor(), tv.transforms.Normalize(train_mean,train_std)])
+
+
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self , index):
-        print(self.data.iloc[index])
         image  =  imread(self.data.iloc[index]['filename'])
         image  = gray2rgb(image)
-        #print(image)
-        item = (image , self.data.iloc[index]['crack'] , self.data.iloc[index]['inactive'])
-
-        return
+        image  = self._transform(image)
+        image = torch.tensor(image)
+        label  = torch.tensor((self.data.iloc[index]['crack'] , self.data.iloc[index]['inactive']))
+        return (image , label)
