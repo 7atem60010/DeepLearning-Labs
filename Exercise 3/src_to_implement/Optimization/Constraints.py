@@ -9,7 +9,7 @@ class L1_Regularizer:
         return self.alpha * np.sign(weights)
 
     def norm(self , weights):
-        print(sum(sum(abs(weights))))
+#        print(sum(sum(abs(weights))))
         reg = self.alpha * sum(sum(abs(weights)))
         return reg
 
@@ -22,7 +22,7 @@ class L2_Regularizer:
         return self.alpha * weights
 
     def norm(self , weights):
-        print(weights)
-        print(self.alpha)
+        #print(weights)
+        #print(self.alpha)
         reg = self.alpha * sum(sum(np.power(weights,2)))
         return reg

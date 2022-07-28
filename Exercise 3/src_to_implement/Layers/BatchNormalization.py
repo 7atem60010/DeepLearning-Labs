@@ -47,16 +47,15 @@ class BatchNormalization(Base):
 
             # Training phase
             else:
-                # mini-batch mean , var
-                new_mean = np.mean(input_tensor_temp, axis=0)
-                new_variance = np.var(input_tensor_temp, axis=0)
+                temp_mean = np.mean(input_tensor_temp, axis=0)
+                temp_variance = np.var(input_tensor_temp, axis=0)
 
                 # Moving avg mean , var
-                self.mean_hat = alpha * self.mean + (1 - alpha) * self.mean
-                self.var_hat = alpha * self.var + (1 - alpha) * self.var
+                self.mean_hat = alpha * self.mean + (1 - alpha) * temp_mean
+                self.var_hat = alpha * self.var + (1 - alpha) * temp_variance
 
-                self.mean = new_mean
-                self.var = new_variance
+                self.mean = temp_mean
+                self.var = temp_variance
 
                 self.input_tensor_hat  = (input_tensor_temp - self.mean)/np.sqrt(self.var + np.finfo(float).eps)
             # Output calculations
