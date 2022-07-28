@@ -58,6 +58,14 @@ class Trainer:
         # -update weights
         # -return the loss
         #TODO
+        self._optim.zero_grad()
+        out_model = self._model(x)
+        loss = self._crit(out_model , y)
+        loss.backward(loss)
+        self._optim.step()
+
+        return loss
+
 
         self._optim.zero_grad()
         
@@ -69,6 +77,7 @@ class Trainer:
         # propagate through the network and calculate the loss and predictions
         # return the loss and the predictions
         #TODO
+        pass
         
     def train_epoch(self):
         # set training mode
@@ -77,7 +86,8 @@ class Trainer:
         # perform a training step
         # calculate the average loss for the epoch and return it
         #TODO
-    
+        pass
+
     def val_test(self):
         # set eval mode. Some layers have different behaviors during training and testing (for example: Dropout, BatchNorm, etc.). To handle those properly, you'd want to call model.eval()
         # disable gradient computation. Since you don't need to update the weights during testing, gradients aren't required anymore. 
@@ -88,7 +98,7 @@ class Trainer:
         # calculate the average loss and average metrics of your choice. You might want to calculate these metrics in designated functions
         # return the loss and print the calculated metrics
         #TODO
-        
+        pass
     
     def fit(self, epochs=-1):
         assert self._early_stopping_patience > 0 or epochs > 0
