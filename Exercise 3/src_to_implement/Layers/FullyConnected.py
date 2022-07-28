@@ -36,7 +36,7 @@ class FullyConnected(Base):
         return self.output_tensor
 
     def initialize(self, weights_initializer, bias_initializer):
-        self.weights = weights_initializer.initialize((2, 1), self.fan_in, self.fan_out)
+        self.weights = weights_initializer.initialize((self.fan_in, self.fan_out), self.fan_in, self.fan_out)
         self.bias = bias_initializer.initialize((1,self.fan_out), 1, self.fan_out)
         self.weights = np.vstack((self.weights, self.bias))
 
