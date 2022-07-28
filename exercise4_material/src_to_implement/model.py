@@ -13,11 +13,15 @@ class ResNet(nn.Module):
         self.bn = nn.BatchNorm2d()
         self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool(3, 2)
-        ResBlock(64, 64, 1)
-        ResBlock(64, 128, 2)
-        ResBlock(128, 256, 2)
-        ResBlock(256, 512, 2)
-        GlobalAvgPool()
-        Flatten()
-        FC(512, 2)
-        Sigmoid()
+        self.res1 = nn.ResBlock(64, 64, 1)
+        self.res2 = nn.ResBlock(64, 128, 2)
+        self.res3 = nn.ResBlock(128, 256, 2)
+        self.res4 = nn.ResBlock(256, 512, 2)
+        self.avg = nn.GlobalAvgPool()
+        self.flatten = nn.Flatten()
+        self.fc = nn.FC(512, 2)
+        self.sig = nn.Sigmoid()
+
+    def ResNet(self, in, out, stride):
+
+
