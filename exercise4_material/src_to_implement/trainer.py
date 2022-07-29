@@ -2,6 +2,7 @@ import torch as t
 from sklearn.metrics import f1_score
 from tqdm.autonotebook import tqdm
 from torch.utils.data import DataLoader
+import numpy as np
 
 
 class Trainer:
@@ -61,6 +62,7 @@ class Trainer:
         #TODO
         self._optim.zero_grad()
         out_model = self._model(x)
+        print(out_model , y)
         loss = self._crit(out_model , y)
         loss.backward(loss)
         self._optim.step()
@@ -78,7 +80,7 @@ class Trainer:
         #TODO
         self._optim.zero_grad()
         out_model = self._model(x)
-        loss = self._crit(out_model, y)
+        loss = f1_score(out_model, y)
         return loss
         
     def train_epoch(self):
@@ -90,10 +92,10 @@ class Trainer:
         #TODO
         loss = 0
         len_data =  self._train_dl.__len__()
-        train_dataloader = DataLoader(self._train_dl, batch_size=64, shuffle=True)
+        #train_dataloader = DataLoader(self._train_dl, batch_size=32, shuffle=True)
 
         for i in range(0, len_data):
-            train_features, train_labels = next(iter(train_dataloader))
+            train_features, train_labels = next(iter(self._train_dl))
             if self._cuda:
                 train_features = train_features.cuda()
                 train_labels = train_labels.cuda()
@@ -116,24 +118,59 @@ class Trainer:
         #TODO
 
         self._model.eval()
+        loss =0
+        with t.no_grad():
+            len_data = self._val_test_dl.__len__()
+            val_test_dataloader = DataLoader(self._val_test_dl, batch_size=32, shuffle=True)
 
-        pass
+            for i in range(0, len_data):
+                val_test_features, test_val_labels = next(iter(val_test_dataloader))
+                if self._cuda:
+                    val_test_features = val_test_features.cuda()
+                    test_val_labels = test_val_labels.cuda()
+                # print("HWELLL"  , train_features , train_labels)
+                loss += self.val_test_step(val_test_features, test_val_labels)
+
+            avg_loss = len_data / len_data
+            return avg_loss
+
     
     def fit(self, epochs=-1):
         assert self._early_stopping_patience > 0 or epochs > 0
         # create a list for the train and validation losses, and create a counter for the epoch 
         #TODO
+        train_losses  = []
+        val_losses = []
+        epoch_counter  = 0
+        last_loss  = -np.inf
         
         while True:
-      
             # stop by epoch number
             # train for a epoch and then calculate the loss and metrics on the validation set
             # append the losses to the respective lists
             # use the save_checkpoint function to save the model (can be restricted to epochs with improvement)
             # check whether early stopping should be performed using the early stopping criterion and stop if so
             # return the losses for both training and validation
-        #TODO
-            break
-                    
-        
-        pass
+            #TODO
+            train_loss = self.train_epoch()
+            val_loss = self.val_test()
+
+            train_losses.append(train_loss)
+            val_losses.append(val_loss)
+
+            self.save_checkpoint(epoch_counter)
+
+
+            if val_loss > last_loss:
+                trigger_times += 1
+
+                if trigger_times >= self._early_stopping_patience:
+                    return train_losses , val_losses
+
+            else:
+                trigger_times = 0
+
+            last_loss = val_loss
+
+
+
