@@ -10,17 +10,17 @@ class ResNet(nn.Module):
     def __init__(self):
         super(ResNet, self).__init__()
         self.cnv1 = nn.Conv2d(3, 64, 7, 2)
-        self.bn = nn.BatchNorm2d()
-        self.relu = F.ReLU()
-        self.maxpool = nn.MaxPool(3, 2)
-        self.res1 = ResBlock.forward(64, 64, 1)
-        self.res2 = ResBlock.forward(64, 128, 2)
-        self.res3 = ResBlock.forward(128, 256, 2)
-        self.res4 = ResBlock.forward(256, 512, 2)
-        self.avg = nn.GlobalAvgPool()
+        self.bn = nn.BatchNorm2d(64)
+        self.relu = nn.ReLU()
+        self.maxpool = nn.MaxPool2d(3, 2)
+        self.res1 = ResBlock(64, 64, 1)
+        self.res2 = ResBlock(64, 128, 2)
+        self.res3 = ResBlock(128, 256, 2)
+        self.res4 = ResBlock(256, 512, 2)
+        self.avg = nn.AvgPool2d(7)
         self.flatten = nn.Flatten()
-        self.fc = nn.FC(512, 2)
-        self.sig = F.Sigmoid()
+        self.fc = nn.Linear(512, 2)
+        self.sig = nn.Sigmoid()
 
     def forward(self , input ):
         out = self.cnv1(input)
@@ -41,11 +41,11 @@ class ResNet(nn.Module):
 class ResBlock(nn.Module):
     def __init__(self , in_channels , out_channels , stride ):
         super(ResBlock, self).__init__()
-        self.cnv_res_block = nn.Conv2d(in_channels, out_channels, 3, stride)
-        self.bn_res_block = nn.BatchNorm2d()
-        self.relu_res_block = F.ReLU()
+        self.cnv_res_block = nn.Conv2d(in_channels, out_channels, 3, padding=(1,1) ,stride = stride)
+        self.bn_res_block = nn.BatchNorm2d(out_channels)
+        self.relu_res_block = nn.ReLU()
 
-        self.cnv_res_block2 = nn.Conv2d(out_channels, out_channels, 3)
+        self.cnv_res_block2 = nn.Conv2d(out_channels, out_channels, 3 , padding=(1,1))
         self.con1 = nn.Conv2d(in_channels , out_channels, 1 , stride)
 
 

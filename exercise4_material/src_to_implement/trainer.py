@@ -1,6 +1,7 @@
 import torch as t
 from sklearn.metrics import f1_score
 from tqdm.autonotebook import tqdm
+from torch.utils.data import DataLoader
 
 
 class Trainer:
@@ -67,8 +68,6 @@ class Trainer:
         return loss
 
 
-        self._optim.zero_grad()
-        
         
     
     def val_test_step(self, x, y):
@@ -77,7 +76,10 @@ class Trainer:
         # propagate through the network and calculate the loss and predictions
         # return the loss and the predictions
         #TODO
-        pass
+        self._optim.zero_grad()
+        out_model = self._model(x)
+        loss = self._crit(out_model, y)
+        return loss
         
     def train_epoch(self):
         # set training mode
@@ -86,7 +88,21 @@ class Trainer:
         # perform a training step
         # calculate the average loss for the epoch and return it
         #TODO
-        pass
+        loss = 0
+        len_data =  self._train_dl.__len__()
+        train_dataloader = DataLoader(self._train_dl, batch_size=64, shuffle=True)
+
+        for i in range(0, len_data):
+            train_features, train_labels = next(iter(train_dataloader))
+            if self._cuda:
+                train_features = train_features.cuda()
+                train_labels = train_labels.cuda()
+            #print("HWELLL"  , train_features , train_labels)
+            loss += self.train_step(train_features , train_labels)
+
+        avg_loss = len_data / len_data
+
+        return avg_loss
 
     def val_test(self):
         # set eval mode. Some layers have different behaviors during training and testing (for example: Dropout, BatchNorm, etc.). To handle those properly, you'd want to call model.eval()
@@ -98,6 +114,9 @@ class Trainer:
         # calculate the average loss and average metrics of your choice. You might want to calculate these metrics in designated functions
         # return the loss and print the calculated metrics
         #TODO
+
+        self._model.eval()
+
         pass
     
     def fit(self, epochs=-1):
@@ -114,7 +133,7 @@ class Trainer:
             # check whether early stopping should be performed using the early stopping criterion and stop if so
             # return the losses for both training and validation
         #TODO
+            break
                     
         
-        
-        
+        pass
