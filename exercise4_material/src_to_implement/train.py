@@ -30,12 +30,12 @@ model  = ResNet()
 # create an object of type Trainer and set its early stopping criterion
 # TODO
 crit = t.nn.BCELoss()
-opt = t.optim.SGD(model.parameters() , lr=0.1 , momentum=0.9)
+opt = t.optim.SGD(model.parameters() , lr =0.001 , momentum= 0.9)
 trainer = Trainer(model, crit , opt , train_dl , val_test_dl , early_stopping_patience=3)
 
 
 # go, go, go... call fit on trainer
-res = trainer.fit(2)
+res = trainer.fit(5)
 
 # plot the results
 plt.plot(np.arange(len(res[0])), res[0], label='train loss')

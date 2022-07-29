@@ -62,7 +62,11 @@ class Trainer:
         #TODO
         self._optim.zero_grad()
         out_model = self._model(x)
-        print(out_model , y)
+        #print(type(out_model) , type(y))
+        out_model = out_model.to(t.float32)
+        y = y.to(t.float32)
+        #print(out_model , y)
+
         loss = self._crit(out_model , y)
         loss.backward(loss)
         self._optim.step()
@@ -80,7 +84,10 @@ class Trainer:
         #TODO
         self._optim.zero_grad()
         out_model = self._model(x)
-        loss = f1_score(out_model, y)
+        print(np.round(out_model.cpu().numpy()), y.cpu().numpy())
+        #f1 = f1_score(num_classes=2)
+        loss = f1_score(np.round(out_model.cpu().numpy()), y.cpu().numpy() , average='macro' )
+        #print(loss)
         return loss
         
     def train_epoch(self):
@@ -103,7 +110,7 @@ class Trainer:
             loss += self.train_step(train_features , train_labels)
 
         avg_loss = len_data / len_data
-
+        print("EPOCH DONEEEEEEEEEEEE")
         return avg_loss
 
     def val_test(self):
@@ -121,10 +128,10 @@ class Trainer:
         loss =0
         with t.no_grad():
             len_data = self._val_test_dl.__len__()
-            val_test_dataloader = DataLoader(self._val_test_dl, batch_size=32, shuffle=True)
+            # val_test_dataloader = DataLoader(self._val_test_dl, batch_size=32, shuffle=True)
 
             for i in range(0, len_data):
-                val_test_features, test_val_labels = next(iter(val_test_dataloader))
+                val_test_features, test_val_labels = next(iter(self._val_test_dl))
                 if self._cuda:
                     val_test_features = val_test_features.cuda()
                     test_val_labels = test_val_labels.cuda()
@@ -142,9 +149,10 @@ class Trainer:
         train_losses  = []
         val_losses = []
         epoch_counter  = 0
+        trigger_times = 0
         last_loss  = -np.inf
         
-        while True:
+        while epoch_counter < epochs:
             # stop by epoch number
             # train for a epoch and then calculate the loss and metrics on the validation set
             # append the losses to the respective lists
@@ -155,6 +163,7 @@ class Trainer:
             train_loss = self.train_epoch()
             val_loss = self.val_test()
 
+            print("The F1 score :" , val_loss)
             train_losses.append(train_loss)
             val_losses.append(val_loss)
 
@@ -170,7 +179,10 @@ class Trainer:
             else:
                 trigger_times = 0
 
+
             last_loss = val_loss
+            epoch_counter += 1
+        return train_losses, val_losses
 
 
 

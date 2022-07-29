@@ -26,6 +26,6 @@ class ChallengeDataset(Dataset):
         image  =  imread(self.data.iloc[index]['filename'])
         image  = gray2rgb(image)
         image  = self._transform(image)
-        image = torch.tensor(image)
+        image = image.clone().detach()
         label  = torch.tensor((self.data.iloc[index]['crack'] , self.data.iloc[index]['inactive']))
         return (image , label)
